@@ -6,7 +6,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from database import Base
-from dependencies import get_db
+import models
+from dependencies import ADMIN_TOKEN, get_db
 from main import app
 
 # In-memory SQLite for testing
@@ -176,3 +177,133 @@ def test_proposal_auto_expiration():
         json={"voter_name": "Eve", "vote": "yes"},
     )
     assert vote_res.status_code == 400
+
+
+def _create_proposal(title="Test Proposal"):
+    res = client.post(
+        "/proposals/",
+        json={"title": title, "description": "Created by a test."},
+    )
+    assert res.status_code == 201
+    return res.json()["id"]
+
+
+def _move_deadline_into_past(proposal_id):
+    """Simulate the deadline passing on a proposal that was created active."""
+    db = TestingSessionLocal()
+    try:
+        proposal = db.get(models.Proposal, proposal_id)
+        proposal.deadline = datetime.utcnow() - timedelta(minutes=1)
+        db.commit()
+    finally:
+        db.close()
+
+
+def test_reject_vote_after_deadline_passes():
+    prop_id = _create_proposal("Bike Lanes")
+
+    # Voting works while the proposal is active
+    ok = client.post(
+        f"/proposals/{prop_id}/vote",
+        json={"voter_name": "Frank", "vote": "yes"},
+    )
+    assert ok.status_code == 201
+
+    _move_deadline_into_past(prop_id)
+
+    late = client.post(
+        f"/proposals/{prop_id}/vote",
+        json={"voter_name": "Grace", "vote": "no"},
+    )
+    assert late.status_code == 400
+    assert "expired" in late.json()["detail"]
+
+    # The earlier vote is still counted and no new vote was added
+    detail = client.get(f"/proposals/{prop_id}").json()
+    assert detail["status"] == "expired"
+    assert detail["vote_counts"]["total"] == 1
+
+
+def test_reject_revocation_after_expiration():
+    prop_id = _create_proposal("Dog Park")
+    vote_id = client.post(
+        f"/proposals/{prop_id}/vote",
+        json={"voter_name": "Heidi", "vote": "yes"},
+    ).json()["id"]
+
+    _move_deadline_into_past(prop_id)
+
+    revoke = client.delete(f"/votes/{vote_id}")
+    assert revoke.status_code == 400
+    assert "expired" in revoke.json()["detail"]
+
+    # Vote must remain in the tally
+    detail = client.get(f"/proposals/{prop_id}").json()
+    assert detail["vote_counts"]["yes"] == 1
+
+
+@pytest.mark.parametrize(
+    "headers",
+    [{}, {"X-Admin-Token": "wrong-token"}, {"X-Admin-Token": ""}],
+    ids=["missing", "invalid", "empty"],
+)
+def test_reject_close_without_valid_admin_token(headers):
+    prop_id = _create_proposal("Town Hall Wi-Fi")
+
+    res = client.patch(f"/proposals/{prop_id}/close", headers=headers)
+    assert res.status_code == 401
+
+    # Proposal must stay open
+    assert client.get(f"/proposals/{prop_id}").json()["status"] == "active"
+
+
+def test_admin_can_close_active_proposal():
+    prop_id = _create_proposal("Farmers Market")
+
+    res = client.patch(
+        f"/proposals/{prop_id}/close", headers={"X-Admin-Token": ADMIN_TOKEN}
+    )
+    assert res.status_code == 200
+    assert res.json()["status"] == "closed"
+    assert client.get(f"/proposals/{prop_id}").json()["status"] == "closed"
+
+    # Closing an already-closed proposal is rejected
+    again = client.patch(
+        f"/proposals/{prop_id}/close", headers={"X-Admin-Token": ADMIN_TOKEN}
+    )
+    assert again.status_code == 400
+
+
+def test_not_found_errors():
+    missing = 99999
+    admin = {"X-Admin-Token": ADMIN_TOKEN}
+
+    assert client.get(f"/proposals/{missing}").status_code == 404
+    assert client.patch(f"/proposals/{missing}/close", headers=admin).status_code == 404
+    assert (
+        client.post(
+            f"/proposals/{missing}/vote",
+            json={"voter_name": "Ivan", "vote": "yes"},
+        ).status_code
+        == 404
+    )
+
+    res = client.delete(f"/votes/{missing}")
+    assert res.status_code == 404
+    assert "not found" in res.json()["detail"]
+
+
+def test_reject_invalid_vote_payload():
+    prop_id = _create_proposal("Playground Upgrade")
+
+    bad_choice = client.post(
+        f"/proposals/{prop_id}/vote",
+        json={"voter_name": "Judy", "vote": "maybe"},
+    )
+    assert bad_choice.status_code == 422
+
+    empty_name = client.post(
+        f"/proposals/{prop_id}/vote",
+        json={"voter_name": "", "vote": "yes"},
+    )
+    assert empty_name.status_code == 422

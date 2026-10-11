@@ -9,7 +9,12 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+# Defaults to voting.db; `alembic -x db_url=sqlite:///other.db upgrade head`
+# targets another database (used by build_sample_db.py).
+config.set_main_option(
+    "sqlalchemy.url",
+    context.get_x_argument(as_dictionary=True).get("db_url", DATABASE_URL),
+)
 target_metadata = Base.metadata
 
 

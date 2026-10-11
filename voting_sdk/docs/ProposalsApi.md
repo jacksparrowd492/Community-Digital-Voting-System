@@ -1,4 +1,4 @@
-# openapi_client.ProposalsApi
+﻿# voting_sdk.ProposalsApi
 
 All URIs are relative to *http://localhost*
 
@@ -22,23 +22,23 @@ Manually close an active proposal.
 
 
 ```python
-import openapi_client
-from openapi_client.models.proposal_response import ProposalResponse
-from openapi_client.rest import ApiException
+import voting_sdk
+from voting_sdk.models.proposal_response import ProposalResponse
+from voting_sdk.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = voting_sdk.Configuration(
     host = "http://localhost"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with voting_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.ProposalsApi(api_client)
-    proposal_id = 56 # int | 
+    api_instance = voting_sdk.ProposalsApi(api_client)
+    proposal_id = 56 # int |
     x_admin_token = 'x_admin_token_example' # str |  (optional)
 
     try:
@@ -57,8 +57,8 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **proposal_id** | **int**|  | 
- **x_admin_token** | **str**|  | [optional] 
+ **proposal_id** | **int**|  |
+ **x_admin_token** | **str**|  | [optional]
 
 ### Return type
 
@@ -93,24 +93,24 @@ Create a new proposal for voting.
 
 
 ```python
-import openapi_client
-from openapi_client.models.proposal_create import ProposalCreate
-from openapi_client.models.proposal_response import ProposalResponse
-from openapi_client.rest import ApiException
+import voting_sdk
+from voting_sdk.models.proposal_create import ProposalCreate
+from voting_sdk.models.proposal_response import ProposalResponse
+from voting_sdk.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = voting_sdk.Configuration(
     host = "http://localhost"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with voting_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.ProposalsApi(api_client)
-    proposal_create = openapi_client.ProposalCreate() # ProposalCreate | 
+    api_instance = voting_sdk.ProposalsApi(api_client)
+    proposal_create = voting_sdk.ProposalCreate() # ProposalCreate |
 
     try:
         # Create a new proposal
@@ -128,7 +128,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **proposal_create** | [**ProposalCreate**](ProposalCreate.md)|  | 
+ **proposal_create** | [**ProposalCreate**](ProposalCreate.md)|  |
 
 ### Return type
 
@@ -163,23 +163,23 @@ View details of a specific proposal along with current vote counts.
 
 
 ```python
-import openapi_client
-from openapi_client.models.proposal_detail_response import ProposalDetailResponse
-from openapi_client.rest import ApiException
+import voting_sdk
+from voting_sdk.models.proposal_detail_response import ProposalDetailResponse
+from voting_sdk.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = voting_sdk.Configuration(
     host = "http://localhost"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with voting_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.ProposalsApi(api_client)
-    proposal_id = 56 # int | 
+    api_instance = voting_sdk.ProposalsApi(api_client)
+    proposal_id = 56 # int |
 
     try:
         # View a specific proposal with current vote counts
@@ -197,7 +197,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **proposal_id** | **int**|  | 
+ **proposal_id** | **int**|  |
 
 ### Return type
 
@@ -232,22 +232,22 @@ Retrieve all proposals, optionally filtered by status ('active', 'closed', 'expi
 
 
 ```python
-import openapi_client
-from openapi_client.models.proposal_response import ProposalResponse
-from openapi_client.rest import ApiException
+import voting_sdk
+from voting_sdk.models.proposal_response import ProposalResponse
+from voting_sdk.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = voting_sdk.Configuration(
     host = "http://localhost"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with voting_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.ProposalsApi(api_client)
+    api_instance = voting_sdk.ProposalsApi(api_client)
     status = 'status_example' # str |  (optional)
 
     try:
@@ -266,7 +266,7 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **status** | **str**|  | [optional] 
+ **status** | **str**|  | [optional]
 
 ### Return type
 
@@ -301,25 +301,25 @@ Submit a vote ('yes', 'no', or 'abstain') on an active proposal.
 
 
 ```python
-import openapi_client
-from openapi_client.models.vote_create import VoteCreate
-from openapi_client.models.vote_response import VoteResponse
-from openapi_client.rest import ApiException
+import voting_sdk
+from voting_sdk.models.vote_create import VoteCreate
+from voting_sdk.models.vote_response import VoteResponse
+from voting_sdk.rest import ApiException
 from pprint import pprint
 
 # Defining the host is optional and defaults to http://localhost
 # See configuration.py for a list of all supported configuration parameters.
-configuration = openapi_client.Configuration(
+configuration = voting_sdk.Configuration(
     host = "http://localhost"
 )
 
 
 # Enter a context with an instance of the API client
-with openapi_client.ApiClient(configuration) as api_client:
+with voting_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.ProposalsApi(api_client)
-    proposal_id = 56 # int | 
-    vote_create = openapi_client.VoteCreate() # VoteCreate | 
+    api_instance = voting_sdk.ProposalsApi(api_client)
+    proposal_id = 56 # int |
+    vote_create = voting_sdk.VoteCreate() # VoteCreate |
 
     try:
         # Submit a vote for a proposal
@@ -337,8 +337,8 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **proposal_id** | **int**|  | 
- **vote_create** | [**VoteCreate**](VoteCreate.md)|  | 
+ **proposal_id** | **int**|  |
+ **vote_create** | [**VoteCreate**](VoteCreate.md)|  |
 
 ### Return type
 

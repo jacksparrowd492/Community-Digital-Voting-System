@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.vote_create import VoteCreate
+from voting_sdk.models.vote_create import VoteCreate
 
 # TODO update the JSON string below
 json = "{}"

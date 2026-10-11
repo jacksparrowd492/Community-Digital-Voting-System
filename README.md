@@ -62,8 +62,14 @@ community-digital-voting-system/
 +-- dependencies.py          # Shared dependencies: get_db, require_admin
 +-- requirements.txt         # Python dependencies
 +-- alembic.ini              # Alembic migration configuration
-+-- voting.db                # SQLite database (auto-created)
-+-- seed_data.sql            # Optional SQL seed data
++-- voting.db                # SQLite database (created by setup; not committed)
++-- seed_data.sql            # Sample data: 5 proposals (3 active, 1 closed, 1 expired)
++-- seed_db.py               # Loads seed_data.sql into voting.db (--reset is destructive)
++-- sample_voting.db         # Clean sample database built from migrations + seed data
++-- build_sample_db.py       # Rebuilds sample_voting.db
++-- pytest.ini               # Limits the default pytest run to tests/
++-- openapi.json             # Exported OpenAPI spec used to generate the SDK
++-- openapitools.json        # OpenAPI Generator config (version + SDK settings)
 +-- setupdev.bat             # One-time environment setup script (Windows)
 +-- runapplication.bat       # Launch backend + frontend (Windows)
 |
@@ -118,7 +124,7 @@ community-digital-voting-system/
 ```bat
 .\setupdev.bat
 ```
-This creates the Python virtual environment in `env\`, installs all backend and frontend dependencies.
+This creates the Python virtual environment in `env\`, installs all backend and frontend dependencies, builds the SQLite schema with `alembic upgrade head`, and loads the sample proposals from `seed_data.sql` (only if the database is empty).
 
 **Step 2 — Launch the application:**
 ```bat
@@ -138,6 +144,7 @@ python -m venv env
 .\env\Scripts\Activate.ps1
 pip install -r requirements.txt
 alembic upgrade head
+python seed_db.py
 python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
@@ -199,15 +206,15 @@ POST /proposals/1/vote
 }
 ```
 
-> **Note:** Each voter can only vote once per proposal. A second attempt returns HTTP 409.
+> **Note:** Each voter can only vote once per proposal. A second attempt returns HTTP 400.
 
 ### Admin Authentication
 
 The admin endpoint (`PATCH /proposals/{id}/close`) requires:
 ```
-X-Admin-Token: secret
+X-Admin-Token: karthi123
 ```
-> Change this token in `dependencies.py` before deploying to production.
+> The default token is `karthi123`. Override it with the `ADMIN_TOKEN` environment variable (read in `dependencies.py`) before deploying to production.
 
 ---
 
@@ -251,19 +258,33 @@ The API base URL is configured in `frontend/src/api.js` pointing to `http://127.
 
 ## Python SDK
 
-The SDK was generated from the live OpenAPI spec:
+The SDK in `voting_sdk/` (Python package `voting_sdk`) is generated with OpenAPI Generator 7.26.0. The generator settings live in `openapitools.json`, and the input spec is the committed `openapi.json`, so no running server is needed to regenerate it.
 
+**Whenever an endpoint or schema changes, re-export `openapi.json` and regenerate the SDK**, otherwise the SDK goes stale. `tests/test_openapi_spec.py` fails if the committed `openapi.json` no longer matches the running app, so pytest catches this automatically.
+
+To regenerate (requires Java and `npm install -g @openapitools/openapi-generator-cli`):
 ```powershell
-openapi-generator-cli generate `
-  -i http://127.0.0.1:8000/openapi.json `
-  -g python `
-  -o voting_sdk
+# 1. Export the current spec from the FastAPI app
+.\env\Scripts\python.exe -c "import json, main; json.dump(main.app.openapi(), open('openapi.json', 'w'), indent=2)"
+
+# 2. Generate the SDK using the config in openapitools.json
+openapi-generator-cli generate --generator-key voting-sdk
+
+# 3. Reinstall it into the virtual environment
+.\env\Scripts\python.exe -m pip install -e voting_sdk
 ```
 
 To install and use locally:
 ```powershell
-cd voting_sdk
-pip install -e .
+.\env\Scripts\python.exe -m pip install -e voting_sdk
+```
+
+```python
+from voting_sdk import ApiClient, Configuration, ProposalsApi
+
+client = ApiClient(Configuration(host="http://127.0.0.1:8000"))
+for p in ProposalsApi(client).list_proposals_proposals_get():
+    print(p.id, p.title, p.status)
 ```
 
 Refer to `voting_sdk/README.md` and `voting_sdk/docs/` for full usage documentation.
@@ -283,15 +304,29 @@ alembic revision --autogenerate -m "describe your change"
 alembic downgrade -1
 ```
 
-To reset the database to the sample data (this **deletes all existing proposals and votes**, then inserts 5 proposals: 3 active, 1 closed, 1 expired):
+The migrations in `migrations/` are the authoritative schema. `voting.db` (your working database) is never committed; `setupdev.bat` creates it with `alembic upgrade head` and then runs `seed_db.py`, which loads `seed_data.sql` **only if the database has no proposals**. Nothing seeds or resets data when the application starts.
+
+### Resetting to the sample data
+
+> **⚠ Warning — destructive.** `--reset` permanently **deletes every proposal and vote** in `voting.db`, then inserts the 5 sample proposals (3 active, 1 closed, 1 expired). There is no undo; copy `voting.db` first if you need to keep it.
+
 ```powershell
-.\env\Scripts\python.exe -c "
-import sqlite3, pathlib
-conn = sqlite3.connect('voting.db')
-conn.executescript(pathlib.Path('seed_data.sql').read_text())
-conn.close()
-print('Seeded.')
-"
+.\env\Scripts\python.exe seed_db.py --reset
+```
+
+### Sample database (`sample_voting.db`)
+
+`sample_voting.db` is a clean, committed SQLite file for reviewers: the schema from the migrations (stamped at revision `39bbda8b379a`) plus the 5 sample proposals and no votes. It is a convenience snapshot, not the source of truth.
+
+To run the app against it, copy it over the working database (this replaces `voting.db`):
+```powershell
+Copy-Item sample_voting.db voting.db
+.\env\Scripts\python.exe -m alembic upgrade head   # no-op unless newer migrations exist
+```
+
+Sample dates are fixed when the file is built, so the "active" proposals auto-expire about 3–7 days later. To get fresh dates, rebuild the file (this only touches `sample_voting.db`) or use `seed_db.py --reset` on your working database:
+```powershell
+.\env\Scripts\python.exe build_sample_db.py
 ```
 
 ---
@@ -299,20 +334,28 @@ print('Seeded.')
 ## Running Tests
 
 ```powershell
-.\env\Scripts\Activate.ps1
-pytest tests/ -v
+.\env\Scripts\python.exe -m pytest -v
 ```
 
-Tests use an in-memory SQLite database and HTTPX TestClient — no running server required.
+`pytest.ini` limits the default run to `tests/`. They use an in-memory SQLite database and the FastAPI TestClient, so no running server is needed. They cover:
+
+- creating and reading proposals, vote counts, and one-vote-per-name uniqueness
+- vote revocation and re-voting while a proposal is active
+- rejecting votes and revocations on closed proposals and after the deadline passes (auto-expiry)
+- admin closure: rejected with a missing, invalid or empty `X-Admin-Token` (401), allowed with a valid token, and rejected when the proposal is already closed (400)
+- 404s for nonexistent proposals and votes, and 422s for invalid vote payloads
+- the committed `openapi.json` matching the live API, so the SDK can't silently go stale
+
+The OpenAPI Generator also creates placeholder tests in `voting_sdk/test/`. They are empty stubs and test no SDK behaviour, so they are not part of the default run (`python -m pytest voting_sdk/test` runs them).
 
 ---
 
 ## Environment Notes
 
 - Virtual environment is in `env\` targeting **Python 3.10**.
-- `voting.db` and `voting_sdk/` are **preserved** when re-running `setupdev.bat`.
+- `voting.db` and `voting_sdk/` are **preserved** when re-running `setupdev.bat` (sample data is only loaded into an empty database).
 - CORS is set to `allow_origins=["*"]` for local development — restrict this in production.
-- The admin token (`secret`) in `dependencies.py` **must** be changed before public deployment.
+- The default admin token (`karthi123`) **must** be overridden via the `ADMIN_TOKEN` environment variable before public deployment.
 - Vite defaults to port **5173**; it auto-selects the next available port if 5173 is busy.
 
 ---

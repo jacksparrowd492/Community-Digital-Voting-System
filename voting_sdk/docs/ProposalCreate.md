@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 ## Example
 
 ```python
-from openapi_client.models.proposal_create import ProposalCreate
+from voting_sdk.models.proposal_create import ProposalCreate
 
 # TODO update the JSON string below
 json = "{}"

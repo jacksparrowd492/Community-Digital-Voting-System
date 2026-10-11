@@ -1,0 +1,6 @@
+# Batch files must use CRLF or cmd.exe can mis-parse labels/goto
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# SQLite databases are binary; never apply line-ending conversion
+*.db binary

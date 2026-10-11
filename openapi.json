@@ -1,0 +1,620 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Community Digital Voting System",
+    "description": "API for community proposals and voting with deadline and revocation support",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/proposals/": {
+      "post": {
+        "tags": [
+          "proposals"
+        ],
+        "summary": "Create a new proposal",
+        "description": "Create a new proposal for voting.",
+        "operationId": "create_proposal_proposals__post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "proposals"
+        ],
+        "summary": "Retrieve all proposals",
+        "description": "Retrieve all proposals, optionally filtered by status ('active', 'closed', 'expired').",
+        "operationId": "list_proposals_proposals__get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProposalResponse"
+                  },
+                  "title": "Response List Proposals Proposals  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proposals/{proposal_id}": {
+      "get": {
+        "tags": [
+          "proposals"
+        ],
+        "summary": "View a specific proposal with current vote counts",
+        "description": "View details of a specific proposal along with current vote counts.",
+        "operationId": "get_proposal_proposals__proposal_id__get",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Proposal Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proposals/{proposal_id}/close": {
+      "patch": {
+        "tags": [
+          "proposals"
+        ],
+        "summary": "Manually close a proposal (Admin)",
+        "description": "Manually close an active proposal.",
+        "operationId": "close_proposal_proposals__proposal_id__close_patch",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Proposal Id"
+            }
+          },
+          {
+            "name": "X-Admin-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proposals/{proposal_id}/vote": {
+      "post": {
+        "tags": [
+          "proposals"
+        ],
+        "summary": "Submit a vote for a proposal",
+        "description": "Submit a vote ('yes', 'no', or 'abstain') on an active proposal.",
+        "operationId": "vote_on_proposal_proposals__proposal_id__vote_post",
+        "parameters": [
+          {
+            "name": "proposal_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Proposal Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoteCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/votes/{vote_id}": {
+      "delete": {
+        "tags": [
+          "votes"
+        ],
+        "summary": "Revoke a vote",
+        "description": "Revoke a previously cast vote, permitted only while the proposal remains active.",
+        "operationId": "revoke_vote_votes__vote_id__delete",
+        "parameters": [
+          {
+            "name": "vote_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Vote Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Health Check",
+        "operationId": "home__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MessageResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "MessageResponse"
+      },
+      "ProposalCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "description": "Title of the proposal"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Description",
+            "description": "Detailed proposal description"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline",
+            "description": "Voting deadline in UTC. Defaults to 2 days from now if not specified."
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description"
+        ],
+        "title": "ProposalCreate"
+      },
+      "ProposalDetailResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "description": "Title of the proposal"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Description",
+            "description": "Detailed proposal description"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Deadline"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed",
+              "expired"
+            ],
+            "title": "Status"
+          },
+          "vote_counts": {
+            "$ref": "#/components/schemas/VoteCounts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "id",
+          "created_at",
+          "deadline",
+          "status",
+          "vote_counts"
+        ],
+        "title": "ProposalDetailResponse"
+      },
+      "ProposalResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "description": "Title of the proposal"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Description",
+            "description": "Detailed proposal description"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Deadline"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "closed",
+              "expired"
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "description",
+          "id",
+          "created_at",
+          "deadline",
+          "status"
+        ],
+        "title": "ProposalResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VoteCounts": {
+        "properties": {
+          "yes": {
+            "type": "integer",
+            "title": "Yes",
+            "default": 0
+          },
+          "no": {
+            "type": "integer",
+            "title": "No",
+            "default": 0
+          },
+          "abstain": {
+            "type": "integer",
+            "title": "Abstain",
+            "default": 0
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "VoteCounts"
+      },
+      "VoteCreate": {
+        "properties": {
+          "voter_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Voter Name",
+            "description": "Name or identifier of the voter"
+          },
+          "vote": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no",
+              "abstain"
+            ],
+            "title": "Vote",
+            "description": "Vote choice ('yes', 'no', 'abstain')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "voter_name",
+          "vote"
+        ],
+        "title": "VoteCreate"
+      },
+      "VoteResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "proposal_id": {
+            "type": "integer",
+            "title": "Proposal Id"
+          },
+          "voter_name": {
+            "type": "string",
+            "title": "Voter Name"
+          },
+          "vote": {
+            "type": "string",
+            "enum": [
+              "yes",
+              "no",
+              "abstain"
+            ],
+            "title": "Vote"
+          },
+          "voted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Voted At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "proposal_id",
+          "voter_name",
+          "vote",
+          "voted_at"
+        ],
+        "title": "VoteResponse"
+      }
+    }
+  }
+}

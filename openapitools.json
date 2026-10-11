@@ -2,6 +2,18 @@
   "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
   "spaces": 2,
   "generator-cli": {
-    "version": "7.26.0"
+    "version": "7.26.0",
+    "generators": {
+      "voting-sdk": {
+        "generatorName": "python",
+        "inputSpec": "openapi.json",
+        "output": "voting_sdk",
+        "additionalProperties": {
+          "packageName": "voting_sdk",
+          "projectName": "voting-sdk",
+          "packageVersion": "1.0.0"
+        }
+      }
+    }
   }
 }

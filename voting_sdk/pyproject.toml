@@ -1,5 +1,5 @@
 [project]
-name = "openapi_client"
+name = "voting_sdk"
 version = "1.0.0"
 description = "Community Digital Voting System"
 authors = [
@@ -39,7 +39,7 @@ extension-pkg-whitelist = "pydantic"
 
 [tool.mypy]
 files = [
-  "openapi_client",
+  "voting_sdk",
   #"test",  # auto-generated tests
   "tests", # hand-written tests
 ]
@@ -77,7 +77,7 @@ disallow_any_generics = true
 
 [[tool.mypy.overrides]]
 module = [
-  "openapi_client.configuration",
+  "voting_sdk.configuration",
 ]
 warn_unused_ignores = true
 strict_equality = true

@@ -249,9 +249,13 @@ export default function AdminDashboard({ showToast, showCreate, onCreateClose })
                 className="form-input"
                 value={adminToken}
                 onChange={e => handleTokenChange(e.target.value)}
-                placeholder="secret"
+                placeholder="karthi123"
               />
-              <div className="form-help">Sent as <code>X-Admin-Token</code> when closing proposals.</div>
+              <div className="form-help">
+                Sent as <code>X-Admin-Token</code> when closing proposals.
+                Development default: <code>karthi123</code>. Set <code>ADMIN_TOKEN</code> on the
+                server for any real deployment.
+              </div>
             </div>
           </div>
         )}

@@ -37,6 +37,10 @@ echo Applying database migrations...
 call "env\Scripts\python.exe" -m alembic upgrade head
 if errorlevel 1 goto error
 
+echo Loading sample data (skipped if the database already has proposals)...
+call "env\Scripts\python.exe" seed_db.py
+if errorlevel 1 goto error
+
 if not exist "frontend\package.json" (
     echo ERROR: frontend\package.json not found.
     goto error
