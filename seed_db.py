@@ -6,7 +6,8 @@ Usage:
     python seed_db.py --db other.db    # target a different database file
 
 Run `alembic upgrade head` first so the tables exist. This script is run by
-setupdev.bat without --reset; it is never run when the application starts.
+setupdev.bat without --reset, and by the Render start command (render.yaml),
+where the disk is ephemeral so each start begins with an empty database.
 """
 import argparse
 import sqlite3
