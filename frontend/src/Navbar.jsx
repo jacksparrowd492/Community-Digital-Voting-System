@@ -8,7 +8,7 @@ export default function Navbar() {
 
   return (
     <header className="app-navbar">
-      <NavLink to="/" className="navbar-brand">
+      <NavLink to="/" className="navbar-brand" aria-label="Community Voting home">
         <div className="navbar-brand-icon">
           <VoteIcon size={16} />
         </div>
@@ -24,7 +24,7 @@ export default function Navbar() {
           }
         >
           <Users size={14} />
-          <span>Voter View</span>
+          <span>Voter<span className="navbar-btn-suffix"> View</span></span>
         </NavLink>
 
         <NavLink

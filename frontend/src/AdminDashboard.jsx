@@ -131,7 +131,7 @@ export default function AdminDashboard({ showToast, showCreate, onCreateClose })
       {/* Header */}
       <div className="admin-page-header">
         <h1 className="admin-page-title">Administrator Console</h1>
-        <div style={{ display:'flex', gap:'0.5rem' }}>
+        <div className="admin-page-actions">
           <button
             className="btn btn-outline"
             onClick={fetchProposals}
@@ -175,7 +175,7 @@ export default function AdminDashboard({ showToast, showCreate, onCreateClose })
           Create New Proposal
         </div>
         <form onSubmit={handleCreate}>
-          <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:'0.75rem' }}>
+          <div className="form-grid-title-hours">
             <div className="form-group">
               <label className="form-label" htmlFor="new-title">Title *</label>
               <input
@@ -217,7 +217,7 @@ export default function AdminDashboard({ showToast, showCreate, onCreateClose })
             />
           </div>
 
-          <div style={{ display:'flex', justifyContent:'flex-end' }}>
+          <div className="form-actions">
             <button type="submit" className="btn btn-navy" disabled={submitting} id="submit-proposal-btn">
               <PlusCircle size={14} />
               {submitting ? 'Publishing…' : 'Publish Proposal'}
@@ -273,7 +273,7 @@ export default function AdminDashboard({ showToast, showCreate, onCreateClose })
         ) : proposals.length === 0 ? (
           <div className="empty-state"><h3>No proposals yet</h3><p>Create one above.</p></div>
         ) : (
-          <table className="admin-table">
+          <table className="admin-table admin-table-responsive">
             <thead>
               <tr>
                 <th>#</th>
@@ -293,21 +293,20 @@ export default function AdminDashboard({ showToast, showCreate, onCreateClose })
                 const isActive = p.status === 'active';
                 return (
                   <tr key={p.id}>
-                    <td style={{ color:'var(--text-muted)', fontWeight:500 }}>#{p.id}</td>
-                    <td style={{ fontWeight:600, maxWidth:200 }}>{p.title}</td>
-                    <td><span className={statusClass(p.status)}>{statusLabel(p.status)}</span></td>
-                    <td style={{ color:'var(--text-secondary)', fontSize:12 }}>
+                    <td className="cell-id" style={{ color:'var(--text-muted)', fontWeight:500 }}>#{p.id}</td>
+                    <td className="cell-title" style={{ fontWeight:600 }}>{p.title}</td>
+                    <td className="cell-status"><span className={statusClass(p.status)}>{statusLabel(p.status)}</span></td>
+                    <td data-label="Deadline" style={{ color:'var(--text-secondary)', fontSize:12 }}>
                       {new Date(p.deadline).toLocaleDateString()}
                     </td>
-                    <td style={{ fontWeight:600 }}>{c.total}</td>
-                    <td className="text-green">{c.yes} ({pct(c.yes,c.total)}%)</td>
-                    <td className="text-red">{c.no} ({pct(c.no,c.total)}%)</td>
-                    <td style={{ color:'var(--gray)' }}>{c.abstain} ({pct(c.abstain,c.total)}%)</td>
-                    <td>
+                    <td data-label="Votes" style={{ fontWeight:600 }}>{c.total}</td>
+                    <td data-label="Yes" className="text-green">{c.yes} ({pct(c.yes,c.total)}%)</td>
+                    <td data-label="No" className="text-red">{c.no} ({pct(c.no,c.total)}%)</td>
+                    <td data-label="Abstain" style={{ color:'var(--gray)' }}>{c.abstain} ({pct(c.abstain,c.total)}%)</td>
+                    <td className="cell-action">
                       {isActive ? (
                         <button
-                          className="btn btn-danger"
-                          style={{ padding:'0.3rem 0.65rem', fontSize:12 }}
+                          className="btn btn-danger btn-sm"
                           onClick={() => handleClose(p.id)}
                           id={`close-btn-${p.id}`}
                         >
@@ -315,7 +314,7 @@ export default function AdminDashboard({ showToast, showCreate, onCreateClose })
                           Close
                         </button>
                       ) : (
-                        <span style={{ fontSize:12, color:'var(--text-muted)' }}>—</span>
+                        <span className="cell-action-none" style={{ fontSize:12, color:'var(--text-muted)' }}>—</span>
                       )}
                     </td>
                   </tr>

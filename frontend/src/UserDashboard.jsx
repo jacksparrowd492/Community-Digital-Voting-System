@@ -12,6 +12,7 @@ import {
   RotateCcw,
   RefreshCw,
   ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
 
 /* ── helpers ── */
@@ -141,6 +142,8 @@ export default function UserDashboard({ showToast }) {
   const [loading, setLoading]     = useState(true);
   const [filter, setFilter]       = useState('all');
   const [selected, setSelected]   = useState(null); // proposal object
+  // Phones show the list and the detail one at a time; desktop ignores this
+  const [mobileDetail, setMobileDetail] = useState(false);
 
   const [userVotes, setUserVotes] = useState(() => {
     // Drop the votes cached against the proposals from before the reseed
@@ -200,6 +203,21 @@ export default function UserDashboard({ showToast }) {
     if (!selected && proposals.length > 0) setSelected(proposals[0]);
   }, [proposals]);
 
+  const openProposal = (p) => {
+    setSelected(p);
+    setMobileDetail(true);
+    window.scrollTo(0, 0);
+  };
+
+  const backToList = () => {
+    setMobileDetail(false);
+    // Return the phone user to the card they opened
+    const id = selected?.id;
+    requestAnimationFrame(() =>
+      document.getElementById(`sidebar-item-${id}`)?.scrollIntoView({ block: 'center' })
+    );
+  };
+
   /* vote */
   /* returns true on success so the form knows whether to clear its input */
   const handleVote = async (proposalId, voterName, choice) => {
@@ -250,18 +268,18 @@ export default function UserDashboard({ showToast }) {
   const FILTER_LABELS = { all: 'All', active: 'Open', expired: 'Expired', closed: 'Closed' };
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${mobileDetail && selected ? 'mobile-show-detail' : 'mobile-show-list'}`}>
       {/* ── Left Sidebar ── */}
       <aside className="sidebar">
         <div className="sidebar-header">
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.75rem' }}>
+          <div className="sidebar-header-row">
             <h2 className="sidebar-title">Proposals</h2>
             <button
-              className="btn btn-outline"
+              className="btn btn-outline btn-icon"
               onClick={fetchProposals}
               disabled={loading}
-              style={{ padding:'0.3rem 0.6rem', fontSize:'12px' }}
               title="Refresh"
+              aria-label="Refresh proposals"
               id="refresh-proposals-btn"
             >
               <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
@@ -306,11 +324,11 @@ export default function UserDashboard({ showToast }) {
               <div
                 key={p.id}
                 className={`sidebar-item ${selected?.id === p.id ? 'selected' : ''}`}
-                onClick={() => setSelected(p)}
+                onClick={() => openProposal(p)}
                 id={`sidebar-item-${p.id}`}
                 role="button"
                 tabIndex={0}
-                onKeyDown={e => e.key === 'Enter' && setSelected(p)}
+                onKeyDown={e => e.key === 'Enter' && openProposal(p)}
               >
                 <div className="sidebar-item-top">
                   <span className="sidebar-item-title">{p.title}</span>
@@ -360,6 +378,11 @@ export default function UserDashboard({ showToast }) {
 
           return (
             <>
+              <button className="mobile-back-btn" onClick={backToList} id="mobile-back-btn">
+                <ChevronLeft size={18} />
+                All proposals
+              </button>
+
               {/* Main info card */}
               <div className="detail-card">
                 <div className="detail-status-row">

@@ -131,6 +131,7 @@ body {
   transition: all 0.15s;
   border: none;
   outline: none;
+  text-decoration: none;
 }
 
 .navbar-btn-outline {
@@ -879,3 +880,232 @@ body {
 .flex-center { display: flex; align-items: center; gap: 0.4rem; }
 .animate-spin { animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Layout helpers (desktop defaults) ─── */
+.sidebar-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.btn-icon { padding: 0.3rem 0.6rem; font-size: 12px; }
+.btn-sm   { padding: 0.3rem 0.65rem; font-size: 12px; }
+
+.admin-page-actions { display: flex; gap: 0.5rem; }
+
+.form-grid-title-hours {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.75rem;
+}
+
+.form-actions { display: flex; justify-content: flex-end; }
+
+.admin-table .cell-title { max-width: 200px; }
+
+/* Only shown on phones, where list and detail are separate screens */
+.mobile-back-btn { display: none; }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — tablets & phones
+═══════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Navbar */
+  .app-navbar { padding: 0 1rem; gap: 0.5rem; }
+  .navbar-brand { min-width: 0; }
+  .navbar-brand-name {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .navbar-actions { gap: 0.4rem; flex-shrink: 0; }
+  .navbar-btn { padding: 0.5rem 0.75rem; min-height: 40px; }
+
+  /* Voter view: list and detail become separate stacked screens */
+  .app-shell {
+    display: block;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+    overflow: visible;
+  }
+
+  .sidebar-header {
+    position: sticky;
+    top: var(--navbar-h);
+    z-index: 10;
+    background: var(--surface);
+    padding: 1rem 1rem 0.75rem;
+  }
+
+  .sidebar-list { overflow: visible; padding: 0; }
+  .sidebar-item { padding: 1rem; }
+  .sidebar-item-title { font-size: 15px; }
+  .sidebar-item-meta { font-size: 12.5px; }
+  .sidebar-item-votes { font-size: 12px; }
+  .mini-bar { height: 6px; border-radius: 3px; }
+
+  .filter-tabs { overflow-x: auto; scrollbar-width: none; }
+  .filter-tabs::-webkit-scrollbar { display: none; }
+  .filter-tab { min-height: 36px; font-size: 13px; white-space: nowrap; }
+
+  .detail-panel {
+    overflow: visible;
+    padding: 1rem 1rem 2rem;
+  }
+
+  .mobile-show-list .detail-panel { display: none; }
+  .mobile-show-detail .sidebar { display: none; }
+
+  .mobile-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 44px;
+    margin: 0 0 0.5rem -0.5rem;
+    padding: 0 0.5rem;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    cursor: pointer;
+  }
+  .mobile-back-btn:active { background: var(--accent-light); }
+
+  .detail-card,
+  .vote-form-card { padding: 1.25rem; margin-bottom: 1rem; }
+
+  .detail-title { font-size: 22px; overflow-wrap: anywhere; }
+  .detail-meta { flex-direction: column; gap: 0.25rem; }
+  .detail-desc { font-size: 15px; overflow-wrap: anywhere; }
+
+  /* Results: 2×2 grid of counts instead of a 4-wide strip */
+  .big-bar { height: 16px; }
+  .bar-legend {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .bar-legend-value { font-size: 22px; }
+
+  /* Forms & buttons — 16px inputs stop iOS from zooming on focus */
+  .form-input-light,
+  .form-input,
+  .form-textarea { font-size: 16px; min-height: 44px; }
+
+  .vote-btn-light { min-height: 48px; font-size: 14px; }
+
+  .voted-banner { flex-wrap: wrap; gap: 0.5rem; }
+  .btn-revoke { min-height: 36px; }
+
+  .btn { min-height: 44px; }
+  .btn-icon { min-width: 44px; }
+
+  /* Admin */
+  .admin-page { padding: calc(var(--navbar-h) + 1.25rem) 1rem 3rem; }
+  .admin-page-header { margin-bottom: 1.25rem; }
+  .admin-page-title { font-size: 20px; }
+  .admin-page-actions { width: 100%; }
+  .admin-page-actions .btn { flex: 1; }
+
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1.25rem;
+  }
+  .metric-box { min-width: 0; padding: 0.85rem; }
+  .metric-num { font-size: 22px; }
+  .metric-lbl { font-size: 10.5px; }
+
+  .admin-card { padding: 1.1rem; }
+  .admin-collapse-trigger { min-height: 48px; padding: 0.75rem 1.1rem; }
+  .admin-collapse-body { padding: 0 1.1rem 1.1rem; }
+
+  .form-grid-title-hours { grid-template-columns: 1fr; gap: 0; }
+  .form-actions .btn { width: 100%; }
+
+  /* Proposal table → one card per proposal */
+  .admin-table-responsive thead { display: none; }
+  .admin-table-responsive,
+  .admin-table-responsive tbody { display: block; }
+
+  .admin-table-responsive tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .admin-table-responsive tr:last-child { border-bottom: none; }
+  .admin-table-responsive tr:hover td { background: transparent; }
+
+  .admin-table-responsive td {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    padding: 0;
+    border: none;
+  }
+  .admin-table-responsive td[data-label]::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 4.75rem;
+  }
+
+  .admin-table-responsive .cell-id { grid-column: 1; grid-row: 1; }
+  .admin-table-responsive .cell-status { grid-column: 2; grid-row: 1; justify-content: flex-end; }
+  .admin-table-responsive .cell-title {
+    grid-column: 1 / -1;
+    max-width: none;
+    white-space: normal;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+    margin-bottom: 0.25rem;
+  }
+  .admin-table-responsive .cell-action { grid-column: 1 / -1; margin-top: 0.4rem; }
+  .admin-table-responsive .cell-action .btn { width: 100%; }
+  .admin-table-responsive .cell-action-none { display: none; }
+
+  /* Toast spans the bottom of the screen */
+  .toast-banner {
+    left: 1rem;
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    max-width: none;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .navbar-btn-suffix { display: none; }
+  .metrics-row { grid-template-columns: repeat(2, 1fr); }
+  .metric-box:last-child { grid-column: 1 / -1; }
+  .admin-table-responsive tr { gap: 0.4rem 0.75rem; }
+  .admin-table-responsive td { gap: 0.35rem; }
+  .admin-table-responsive td[data-label]::before { min-width: 4.1rem; }
+}
+
+/* Very narrow screens: icon-only brand */
+@media (max-width: 340px) {
+  .navbar-brand-name { display: none; }
+}
